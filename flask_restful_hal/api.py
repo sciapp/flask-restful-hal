@@ -17,6 +17,7 @@ from collections import OrderedDict
 import flask_restful as rest
 from flask_restful.representations.json import output_json
 from flask import Flask, Blueprint  # noqa: F401  # pylint: disable=unused-import
+from .representation import has_html_support, output_html
 from .resource import Resource  # noqa: F401  # pylint: disable=unused-import
 
 
@@ -39,6 +40,8 @@ class Api(rest.Api):  # type: ignore
             **kwargs
         )
         self.representations = OrderedDict([('application/hal+json', output_json)])
+        if has_html_support():
+            self.representations['text/html'] = output_html
 
     def add_resource(self, resource, *urls, **kwargs):
         # type: (Resource, str, Any) -> None
