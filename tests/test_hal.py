@@ -43,12 +43,12 @@ class TodoList(Resource):
 
     @staticmethod
     def embedded():
-        arguments_list = [(todo, ) for todo in TODOS]
+        arguments_list = [(todo, ) for todo in sorted(TODOS.keys())]
         return Embedded('items', Todo, *arguments_list)
 
     @staticmethod
     def links():
-        arguments_list = [('/todos/{}'.format(todo), {'title': todo}) for todo in TODOS]
+        arguments_list = [('/todos/{}'.format(todo), {'title': todo}) for todo in sorted(TODOS.keys())]
         return Link('items', *arguments_list)
 
 
