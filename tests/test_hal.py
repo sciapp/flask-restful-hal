@@ -119,11 +119,7 @@ def test_links(client):
 def test_html_output(client):
     response = client.get(url_for('todolist'), headers={'Accept': 'text/html'})
     assert response.status_code == 200
-    assert response.data == '''
-<!DOCTYPE html>
-<html>
-<body>
-<table border="1"><tr><th>size</th><td>3</td></tr></table>
-</body>
-</html>
-'''.strip()
+    assert (
+        response.data ==
+        b'<!DOCTYPE html><html><body><table border="1"><tr><th>size</th><td>3</td></tr></table></body></html>'
+    )

@@ -22,14 +22,7 @@ def has_html_support():
 
 
 def output_html(data, code, headers=None):
-    html_document = '''
-<!DOCTYPE html>
-<html>
-<body>
-{}
-</body>
-</html>
-'''.format(json2html.convert(data)).strip()
+    html_document = '<!DOCTYPE html><html><body>{}</body></html>'.format(json2html.convert(data))
     resp = make_response(html_document, code)
     resp.headers.extend(headers or {})
     return resp
