@@ -12,6 +12,16 @@ from setuptools import setup, find_packages
 from flask_restful_hal._version import __version__
 
 
+def get_install_requires_from_requirements(requirements_filename='requirements.txt'):
+    try:
+        with codecs.open(requirements_filename, 'r', 'utf-8') as requirements_file:
+            requirements = requirements_file.readlines()
+    except OSError:
+        import logging
+        logging.warning('Could not convert the readme file to rst.')
+        return requirements
+
+
 def get_long_description_from_readme(readme_filename='README.md'):
     rst_filename = '{}.rst'.format(os.path.splitext(os.path.basename(readme_filename))[0])
     created_tmp_rst = False
@@ -32,22 +42,19 @@ def get_long_description_from_readme(readme_filename='README.md'):
 
 
 long_description = get_long_description_from_readme()
+install_requires = get_install_requires_from_requirements()
 
 setup(
     name='flask-restful-hal',
     version=__version__,
     packages=find_packages(),
-    install_requires=[
-        'Flask',
-        'Flask-RESTful',
-        'future'
-    ],
+    install_requires=install_requires,
     author='Ingo Heimbach',
     author_email='i.heimbach@fz-juelich.de',
     description='HAL extension for Flask-RESTful',
     long_description=long_description,
     license='MIT',
-    url='https://github.com/IngoHeimbach/flask-restful-hal',
+    url='https://github.com/sciapp/flask-restful-hal',
     keywords=['Flask', 'RESTful', 'HAL'],
     classifiers=[
         'Development Status :: 4 - Beta',
