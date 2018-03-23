@@ -174,7 +174,8 @@ class Resource(rest.Resource):  # type: ignore
         for key in ('embed', 'include_links'):
             del kwargs[key]
         merged_kwargs = merge_args_and_kwargs(*args, **kwargs)
-        resource = dict(cls.data(**merged_kwargs))
+        data = cls.data(**merged_kwargs)
+        resource = dict(data if data is not None else ())
         if include_links:
             add_links(resource, **merged_kwargs)
         if embed > 0:
