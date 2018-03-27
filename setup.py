@@ -48,6 +48,9 @@ setup(
     name='flask-restful-hal',
     version=__version__,
     packages=find_packages(),
+    package_data={
+        str(''): ['requirements.txt']  # setuptools needs byte strings as keys when running Python 2.x
+    },
     install_requires=install_requires,
     author='Ingo Heimbach',
     author_email='i.heimbach@fz-juelich.de',
