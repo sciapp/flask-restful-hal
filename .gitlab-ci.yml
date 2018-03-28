@@ -1,0 +1,9 @@
+image: iffregistry.fz-juelich.de/docker-images/python-testing:latest
+
+stages:
+  - test
+
+test:
+  stage: test
+  script:
+    - tox
