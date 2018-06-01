@@ -51,18 +51,20 @@ class Embedded:
     def data(self, embed=0, include_links=True):
         # type: (int, bool) -> Optional[Union[Dict[str, Any], List[Dict[str, Any]]]]
         if len(self._params_list) > 1 or (self._always_as_list and self._params_list):
+            resource_instance = self._resource()
             return [
-                self._resource.to_dict(*params, embed=embed - 1, include_links=include_links)
+                resource_instance.to_dict(*params, embed=embed - 1, include_links=include_links)
                 if isinstance(params, (list, tuple)) else
-                self._resource.to_dict(embed=embed - 1, include_links=include_links, **params)
+                resource_instance.to_dict(embed=embed - 1, include_links=include_links, **params)
                 for params in self._params_list
             ]
         elif len(self._params_list) == 1:
             params = self._params_list[0]
+            resource_instance = self._resource()
             if isinstance(params, (list, tuple)):
-                return self._resource.to_dict(*params, embed=embed - 1, include_links=include_links)
+                return resource_instance.to_dict(*params, embed=embed - 1, include_links=include_links)
             else:
-                return self._resource.to_dict(embed=embed - 1, include_links=include_links, **params)
+                return resource_instance.to_dict(embed=embed - 1, include_links=include_links, **params)
         else:
             return None
 
@@ -109,8 +111,7 @@ class Resource(rest.Resource):  # type: ignore
     _request_parser.add_argument('embed')
     _request_parser.add_argument('links')
 
-    @classmethod
-    def to_dict(cls, *args, **kwargs):
+    def to_dict(self, *args, **kwargs):
         # type: (str, Any) -> Dict[str, Any]
         def extract_keywords_from_url(url):
             # type: (str) -> List[str]
@@ -126,7 +127,7 @@ class Resource(rest.Resource):  # type: ignore
 
         def merge_args_and_kwargs(*args, **kwargs):
             # type: (str, str) -> Dict[str, str]
-            url_keywords = extract_keywords_from_url(cls._primary_url)
+            url_keywords = extract_keywords_from_url(self._primary_url)
             merged_kwargs = {url_keyword: arg for url_keyword, arg in zip(url_keywords, args)}  # type: Dict[str, str]
             merged_kwargs.update(kwargs)
             # cheroot / CherryPy unquotes URLs but not ``%2F`` which is the path separator -> unquote it explicitly
@@ -142,10 +143,10 @@ class Resource(rest.Resource):  # type: ignore
                 keyword = match_obj.group(1)
                 return urllib_quote(kwargs[keyword], safe='')
 
-            self_link = Link('self', re.sub(r'<(?:.*:)?([^>]*)>', substitute, cls._primary_url), quote=False)
+            self_link = Link('self', re.sub(r'<(?:.*:)?([^>]*)>', substitute, self._primary_url), quote=False)
             resource['_links'] = {self_link.rel: self_link.link}
             try:
-                links = cls.links(**kwargs)
+                links = self.links(**kwargs)
             except AttributeError:
                 return
             if links is None:
@@ -158,7 +159,7 @@ class Resource(rest.Resource):  # type: ignore
         def embed_resources(resource, **kwargs):
             # type: (Dict[str, Any], str) -> None
             try:
-                embeddeds = cls.embedded(**kwargs)
+                embeddeds = self.embedded(**kwargs)
             except AttributeError:
                 return
             if embeddeds is None:
@@ -174,7 +175,7 @@ class Resource(rest.Resource):  # type: ignore
         for key in ('embed', 'include_links'):
             del kwargs[key]
         merged_kwargs = merge_args_and_kwargs(*args, **kwargs)
-        data = cls.data(**merged_kwargs)
+        data = self.data(**merged_kwargs)
         resource = dict(data if data is not None else ())
         if include_links:
             add_links(resource, **merged_kwargs)
@@ -199,4 +200,6 @@ class Resource(rest.Resource):  # type: ignore
             return embed, links
 
         embed, include_links = parse_args()
+        if hasattr(self, 'pre_hal') and callable(self.pre_hal):
+            self.pre_hal(embed=embed, include_links=include_links, **kwargs)
         return self.to_dict(embed=embed, include_links=include_links, **kwargs)
