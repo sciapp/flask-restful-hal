@@ -15,10 +15,11 @@ pip install flask-restful-hal
 
 ## Usage
 
-*Flask-RESTful-HAL* extends the `Resource` base class of Flask-RESTful. Instead of defining a `get` method, a static
-`data` method must be implemented which returns the contents of the resource class. In addition the two optional static
-methods `embedded` and `links` can be defined to describe which resources are embedded and linked to the current
-resource.
+*Flask-RESTful-HAL* extends the `Resource` base class of Flask-RESTful. Instead of defining a `get` method, a `data`
+method must be implemented which returns the contents of the resource class. In addition the two optional methods
+`embedded` and `links` can be defined to describe which resources are embedded and linked to the current resource. All
+three methods can be defined as `staticmethod` if no data needs to be shared between the method invocations (see the
+[section about data sharing](#sharing-data-between-methods) for more information).
 
 ### Example of a minimal resource class
 
@@ -122,6 +123,30 @@ app.run()
 By default, no resources are embedded. Embedding resources can be requested with the query string `embed=true` which
 affects all resources recursively (embedded resources can embed resources as well). This behavior can be changed by
 specifying a concrete level of embedding (e.g. `embed=2` would only embed two levels of resources).
+
+### Sharing data between methods
+
+In most cases, the `data`, `embedded` and `links` methods need access to the same data source. In order to avoid
+accessing the data backend (for example a database) three times with similar queries you can define a forth `pre_hal`
+method which is called on every `GET` request before `data`, `embedded` or `links` are executed. In `pre_hal` you can
+access the data backend and cache the result in instance variables of the current resource object.
+
+```python
+class TodoList(Resource):
+    def pre_hal(self, embed, include_links, todo):
+        self.todos = db.query(...)
+
+    def data(self):
+        return {'size': len(self.todos)}
+
+    def embedded(self):
+        arguments_list = [(todo, ) for todo in sorted(self.todos.keys())]
+        return Embedded('items', Todo, *arguments_list)
+
+    def links(self):
+        arguments_list = [('/todos/{}'.format(todo), {'title': todo}) for todo in sorted(self.todos.keys())]
+        return Link('items', *arguments_list)
+```
 
 ### Securing API endpoints
 
