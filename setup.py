@@ -57,6 +57,7 @@ setup(
     package_data={
         str(''): ['requirements.txt']  # setuptools needs byte strings as keys when running Python 2.x
     },
+    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, <4',
     install_requires=install_requires,
     author='Ingo Heimbach',
     author_email='i.heimbach@fz-juelich.de',
