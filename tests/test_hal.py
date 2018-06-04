@@ -37,17 +37,17 @@ class Todo(Resource):
 
 
 class TodoList(Resource):
-    @staticmethod
-    def data():
-        return {'size': len(TODOS)}
+    def pre_hal(self, embed, include_links, **kwargs):
+        self._size = len(TODOS)
 
-    @staticmethod
-    def embedded():
+    def data(self):
+        return {'size': self._size}
+
+    def embedded(self):
         arguments_list = [(todo, ) for todo in sorted(TODOS.keys())]
         return Embedded('items', Todo, *arguments_list)
 
-    @staticmethod
-    def links():
+    def links(self):
         arguments_list = [('/todos/{}'.format(todo), {'title': todo}) for todo in sorted(TODOS.keys())]
         return Link('items', *arguments_list)
 
