@@ -13,6 +13,13 @@ The latest version can be obtained from PyPI:
 pip install flask-restful-hal
 ```
 
+If you use Arch Linux or one of its derivatives, you can also install `flask-restful-hal` from the
+[AUR](https://aur.archlinux.org/packages/python-flask-restful-hal/):
+
+```bash
+yay -S python-flask-restful-hal
+```
+
 ## Usage
 
 *Flask-RESTful-HAL* extends the `Resource` base class of Flask-RESTful. Instead of defining a `get` method, a `data`
