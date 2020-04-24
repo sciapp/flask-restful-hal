@@ -41,7 +41,7 @@ deploy-to-pypi:
     echo "username = __token__"          >> ~/.pypirc;
     echo "password = ${PYPI_DEPLOY_KEY}" >> ~/.pypirc;
   - python setup.py sdist
-  - python setup.py bdist_wheel
+  - python setup.py bdist_wheel --universal
   - twine upload dist/*
 
 deploy-to-aur:
