@@ -50,6 +50,7 @@ setup(
     author_email="i.heimbach@fz-juelich.de",
     description="HAL extension for Flask-RESTful",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     license="MIT",
     url="https://github.com/sciapp/flask-restful-hal",
     keywords=["Flask", "RESTful", "HAL"],
